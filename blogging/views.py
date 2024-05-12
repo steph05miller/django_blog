@@ -3,20 +3,24 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import loader
 from blogging.models import Post
 
-def list_view(request):
-    published = Post.objects.exclude(published_date__exact=None)
-    posts = published.order_by('-published_date')
-    context = {'posts': posts}
-    return render(request, 'blogging/lists.html', context)
+class PostListView(ListView):
+    template_name = 'blogging/lists.html'
+    queryset = Post.objects.exclude(published_date__exact=None).order_by('-published_date')
+    context_object_name = 'posts'
 
-def detail_view(request, post_id):
-    published = Post.objects.exclude(published_date__exact=None)
-    try:
-        post = published.get(pk=post_id)
-    except Post.DoesNotExist:
-        raise Http404
-    context = {'post': post}
-    return render(request, 'blogging/detail.html', context)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blogging/detail.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.exclude(published_date__exact=None)
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset=queryset)
+        if obj.published_date is None:
+            raise Http404("Post does not exist or is not published.")
+        return obj
 
 def stub_view(request, *args, **kwargs):
     body = "Stub View\n\n"
