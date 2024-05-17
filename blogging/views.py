@@ -4,14 +4,18 @@ from django.template import loader
 from django.views.generic import ListView, DetailView
 from blogging.models import Post
 
+
 class PostListView(ListView):
-    template_name = 'blogging/lists.html'
-    queryset = Post.objects.exclude(published_date__exact=None).order_by('-published_date')
-    context_object_name = 'posts'
+    template_name = "blogging/lists.html"
+    queryset = Post.objects.exclude(published_date__exact=None).order_by(
+        "-published_date"
+    )
+    context_object_name = "posts"
+
 
 class PostDetailView(DetailView):
     model = Post
-    template_name = 'blogging/detail.html'
+    template_name = "blogging/detail.html"
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -23,6 +27,7 @@ class PostDetailView(DetailView):
             raise Http404("Post does not exist or is not published.")
         return obj
 
+
 def stub_view(request, *args, **kwargs):
     body = "Stub View\n\n"
     if args:
@@ -32,4 +37,3 @@ def stub_view(request, *args, **kwargs):
         body += "Kwargs:\n"
         body += "\n".join(["\t%s: %s" % i for i in kwargs.items()])
     return HttpResponse(body, content_type="text/plain")
-
